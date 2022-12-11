@@ -20,9 +20,21 @@ io.on('connection', socket => {
       io.emit('get-users', activeUsers)
    })
 
+   // socket disconnect
    socket.on('disconnect', () => {
       activeUsers = activeUsers.filter(user => user.socketId !== socket.id)
       console.log('User disconnected', activeUsers)
       io.emit('get-users', activeUsers)
+   })
+
+   // socket send-message
+   socket.on('send-message', data => {
+      const { receiverId } = data
+      const user = activeUsers.find(user => user.userId === receiverId)
+      console.log('Sending from socket io: ', receiverId)
+      console.log('Data: ', data)
+      if (user) {
+         io.to(user.socketId).emit('receive-message', data)
+      }
    })
 })
